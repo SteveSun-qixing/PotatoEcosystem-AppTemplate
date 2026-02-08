@@ -1,0 +1,62 @@
+# 模板应用默认配置
+# 遵循配置系统规范（开发规范 4）
+# 所有配置项通过配置文件管理，不硬编码
+
+app:
+  name: "Chips AppTemplate"
+  version: "1.0.0"
+
+locale:
+  default: "zh-CN"
+  fallback: "en-US"
+  supported:
+    - "zh-CN"
+    - "en-US"
+
+theme:
+  default: "default-light"
+  follow_system: true
+
+window:
+  width: 1200
+  height: 800
+  min_width: 800
+  min_height: 600
+
+connection:
+  core_url: "ws://127.0.0.1:9527"
+  auto_connect: true
+  reconnect_interval: 5000
+  max_reconnect_attempts: 3
+
+logging:
+  level: "info"
+  transports:
+    - "console"
+
+keyboard:
+  bindings:
+    - id: "save"
+      key: "Ctrl+S"
+      mac_key: "Cmd+S"
+      action: "app.save"
+    - id: "undo"
+      key: "Ctrl+Z"
+      mac_key: "Cmd+Z"
+      action: "app.undo"
+    - id: "redo"
+      key: "Ctrl+Shift+Z"
+      mac_key: "Cmd+Shift+Z"
+      action: "app.redo"
+    - id: "find"
+      key: "Ctrl+F"
+      mac_key: "Cmd+F"
+      action: "app.find"
+    - id: "theme_toggle"
+      key: "Ctrl+Shift+T"
+      mac_key: "Cmd+Shift+T"
+      action: "app.toggle_theme"
+    - id: "lang_toggle"
+      key: "Ctrl+Shift+L"
+      mac_key: "Cmd+Shift+L"
+      action: "app.toggle_locale"
