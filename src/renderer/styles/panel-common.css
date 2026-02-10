@@ -1,0 +1,426 @@
+/**
+ * 测试面板通用样式
+ * 遵循主题系统规范，使用 CSS 变量
+ */
+
+.test-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--chips-spacing-lg, 20px);
+}
+
+.panel-header {
+  display: flex;
+  flex-direction: column;
+  gap: var(--chips-spacing-sm, 12px);
+  padding-bottom: var(--chips-spacing-md, 16px);
+  border-bottom: 2px solid var(--chips-color-border, #e2e8f0);
+}
+
+.panel-title {
+  font-size: var(--chips-font-size-lg, 1.125rem);
+  font-weight: var(--chips-font-weight-semibold, 600);
+  color: var(--chips-color-text, #1e293b);
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.panel-desc {
+  font-size: var(--chips-font-size-sm, 0.875rem);
+  color: var(--chips-color-text-secondary, #64748b);
+  line-height: 1.5;
+}
+
+.panel-actions {
+  display: flex;
+  gap: var(--chips-spacing-sm, 10px);
+  margin-top: var(--chips-spacing-xs, 6px);
+}
+
+.run-btn {
+  padding: var(--chips-spacing-sm, 10px) var(--chips-spacing-lg, 20px);
+  background: linear-gradient(135deg, var(--chips-color-primary, #3b82f6) 0%, #2563eb 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--chips-radius-md, 10px);
+  font-size: var(--chips-font-size-sm, 0.875rem);
+  font-weight: var(--chips-font-weight-medium, 500);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+}
+
+.run-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.run-btn:active {
+  transform: translateY(0);
+}
+
+.run-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.ghost-btn {
+  padding: var(--chips-spacing-sm, 10px) var(--chips-spacing-md, 16px);
+  background-color: transparent;
+  color: var(--chips-color-text-secondary, #64748b);
+  border: 1.5px solid var(--chips-color-border, #e2e8f0);
+  border-radius: var(--chips-radius-md, 10px);
+  font-size: var(--chips-font-size-sm, 0.875rem);
+  font-weight: var(--chips-font-weight-medium, 500);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ghost-btn:hover {
+  color: var(--chips-color-text, #1e293b);
+  border-color: var(--chips-color-primary, #3b82f6);
+  background-color: rgba(59, 130, 246, 0.04);
+}
+
+.ghost-btn:active {
+  transform: scale(0.98);
+}
+
+/* 信息横幅 */
+.info-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--chips-spacing-sm, 10px);
+  padding: var(--chips-spacing-md, 14px);
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(59, 130, 246, 0.04) 100%);
+  border: 1px solid rgba(59, 130, 246, 0.2);
+  border-radius: var(--chips-radius-md, 10px);
+}
+
+.banner-icon {
+  font-size: 1.2rem;
+}
+
+.banner-text {
+  color: var(--chips-color-text, #1e293b);
+  font-size: var(--chips-font-size-sm, 0.875rem);
+  line-height: 1.5;
+}
+
+/* 状态卡片 */
+.status-grid,
+.preview-grid,
+.palette-grid,
+.event-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--chips-spacing-md, 14px);
+}
+
+.status-card,
+.preview-card,
+.palette-card,
+.stat-card {
+  padding: var(--chips-spacing-md, 14px);
+  border: 1px solid var(--chips-color-border, #e2e8f0);
+  border-radius: var(--chips-radius-md, 10px);
+  background-color: var(--chips-color-surface, #f8fafc);
+  display: flex;
+  flex-direction: column;
+  gap: var(--chips-spacing-sm, 10px);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.status-card:hover,
+.preview-card:hover,
+.palette-card:hover,
+.stat-card:hover {
+  border-color: var(--chips-color-primary, #3b82f6);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+}
+
+.status-card.status-highlight {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.04) 0%, rgba(16, 185, 129, 0.02) 100%);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.status-card.full-width {
+  grid-column: 1 / -1;
+}
+
+.status-label,
+.preview-label,
+.palette-label,
+.stat-label {
+  font-size: var(--chips-font-size-xs, 0.75rem);
+  color: var(--chips-color-text-secondary, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: var(--chips-font-weight-medium, 500);
+}
+
+.status-value,
+.preview-value,
+.stat-value {
+  display: flex;
+  align-items: center;
+  gap: var(--chips-spacing-sm, 8px);
+  font-size: var(--chips-font-size-base, 0.95rem);
+  color: var(--chips-color-text, #1e293b);
+  font-weight: var(--chips-font-weight-medium, 500);
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: var(--chips-color-border, #cbd5e1);
+  box-shadow: 0 0 0 2px rgba(203, 213, 225, 0.2);
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.status-dot.pass {
+  background-color: #10b981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+}
+
+.status-dot.fail {
+  background-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+}
+
+.status-dot.warn {
+  background-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+/* 测试结果 */
+.panel-results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--chips-spacing-sm, 10px);
+}
+
+.result-item {
+  display: flex;
+  align-items: center;
+  gap: var(--chips-spacing-md, 12px);
+  padding: var(--chips-spacing-md, 12px) var(--chips-spacing-md, 14px);
+  background-color: var(--chips-color-surface, #f8fafc);
+  border: 1px solid var(--chips-color-border, #e2e8f0);
+  border-radius: var(--chips-radius-md, 10px);
+  font-size: var(--chips-font-size-sm, 0.875rem);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.result-item:hover {
+  border-color: var(--chips-color-primary, #3b82f6);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+.result-status {
+  padding: 4px var(--chips-spacing-sm, 10px);
+  border-radius: var(--chips-radius-sm, 6px);
+  font-size: var(--chips-font-size-xs, 0.75rem);
+  font-weight: var(--chips-font-weight-semibold, 600);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.result-status.pass {
+  background-color: #10b981;
+  color: #ffffff;
+}
+
+.result-status.fail {
+  background-color: #ef4444;
+  color: #ffffff;
+}
+
+.result-name {
+  font-weight: var(--chips-font-weight-medium, 500);
+  color: var(--chips-color-text, #1e293b);
+}
+
+.result-message {
+  flex: 1;
+  color: var(--chips-color-text-secondary, #64748b);
+  font-size: var(--chips-font-size-xs, 0.75rem);
+}
+
+.result-duration {
+  color: var(--chips-color-text-secondary, #64748b);
+  font-size: var(--chips-font-size-xs, 0.75rem);
+  font-variant-numeric: tabular-nums;
+}
+
+.no-results {
+  color: var(--chips-color-text-secondary, #64748b);
+  font-size: var(--chips-font-size-sm, 0.875rem);
+  font-style: italic;
+  text-align: center;
+  padding: var(--chips-spacing-xl, 32px);
+}
+
+/* 模块标签 */
+.module-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--chips-spacing-xs, 6px);
+}
+
+.module-tag {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px var(--chips-spacing-sm, 10px);
+  border-radius: var(--chips-radius-sm, 6px);
+  font-size: var(--chips-font-size-xs, 0.7rem);
+  background-color: var(--chips-color-background, #ffffff);
+  border: 1.5px solid var(--chips-color-border, #e2e8f0);
+  font-weight: var(--chips-font-weight-medium, 500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  transition: all 0.15s ease;
+}
+
+.module-tag.pass {
+  color: #10b981;
+  border-color: #10b981;
+  background-color: rgba(16, 185, 129, 0.06);
+}
+
+.module-tag.fail {
+  color: #ef4444;
+  border-color: #ef4444;
+  background-color: rgba(239, 68, 68, 0.06);
+}
+
+.tag-icon {
+  font-size: 0.65rem;
+  font-weight: bold;
+}
+
+/* 调色板 */
+.palette-card {
+  flex-direction: row;
+}
+
+.palette-swatch {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--chips-radius-sm, 8px);
+  border: 2px solid var(--chips-color-border, #e2e8f0);
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.palette-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.palette-value {
+  font-size: var(--chips-font-size-xs, 0.75rem);
+  color: var(--chips-color-text, #1e293b);
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+  word-break: break-all;
+}
+
+/* 事件日志 */
+.event-log {
+  border: 1px solid var(--chips-color-border, #e2e8f0);
+  border-radius: var(--chips-radius-md, 10px);
+  background-color: var(--chips-color-surface, #f8fafc);
+  padding: var(--chips-spacing-md, 14px);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.event-log::-webkit-scrollbar {
+  width: 6px;
+}
+
+.event-log::-webkit-scrollbar-track {
+  background: var(--chips-color-background, #f8fafc);
+  border-radius: 3px;
+}
+
+.event-log::-webkit-scrollbar-thumb {
+  background: var(--chips-color-border, #cbd5e1);
+  border-radius: 3px;
+}
+
+.event-log-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--chips-spacing-sm, 10px);
+  padding-bottom: var(--chips-spacing-sm, 10px);
+  border-bottom: 1px solid var(--chips-color-border, #e2e8f0);
+}
+
+.event-log-title {
+  font-size: var(--chips-font-size-sm, 0.875rem);
+  color: var(--chips-color-text, #1e293b);
+  font-weight: var(--chips-font-weight-semibold, 600);
+  letter-spacing: -0.01em;
+}
+
+.event-log-empty {
+  font-size: var(--chips-font-size-sm, 0.875rem);
+  color: var(--chips-color-text-secondary, #64748b);
+  font-style: italic;
+  text-align: center;
+  padding: var(--chips-spacing-lg, 20px);
+}
+
+.event-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--chips-spacing-xs, 8px);
+}
+
+.event-log-item {
+  display: grid;
+  grid-template-columns: 72px 120px 1fr;
+  gap: var(--chips-spacing-sm, 10px);
+  font-size: var(--chips-font-size-xs, 0.75rem);
+  padding: var(--chips-spacing-xs, 6px);
+  border-radius: var(--chips-radius-sm, 6px);
+  transition: background-color 0.15s ease;
+}
+
+.event-log-item:hover {
+  background-color: rgba(59, 130, 246, 0.04);
+}
+
+.event-time {
+  color: var(--chips-color-text-secondary, #64748b);
+  font-variant-numeric: tabular-nums;
+}
+
+.event-name {
+  color: var(--chips-color-text, #1e293b);
+  font-weight: var(--chips-font-weight-medium, 500);
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+}
+
+.event-payload {
+  color: var(--chips-color-text-secondary, #64748b);
+  word-break: break-all;
+  font-family: 'SF Mono', 'Monaco', 'Consolas', monospace;
+}
