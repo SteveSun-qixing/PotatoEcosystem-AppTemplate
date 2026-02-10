@@ -4,13 +4,32 @@
  * @description 验证 CoreConnector 通信链路
  */
 
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { t } from '../../services/i18n-service';
 import { getSdkSync } from '../../services/sdk-service';
 import type { TestResult } from '../../types';
 
 const results = ref<TestResult[]>([]);
 const running = ref(false);
+const snapshot = ref({
+  sdkReady: false,
+  state: 'unknown',
+  connected: false,
+  hasRequest: false,
+});
+
+function refreshSnapshot(): void {
+  const sdk = getSdkSync();
+  snapshot.value.sdkReady = !!sdk?.isReady;
+  snapshot.value.state = sdk?.state ?? 'unknown';
+  snapshot.value.connected = !!sdk?.connector?.isConnected;
+  snapshot.value.hasRequest = typeof sdk?.connector?.request === 'function';
+}
+
+function formatState(state: string): string {
+  const known = ['ready', 'loading', 'connecting', 'connected', 'disconnected', 'error'];
+  return known.includes(state) ? t(`status.${state}`) : state;
+}
 
 async function runTests(): Promise<void> {
   running.value = true;
@@ -21,7 +40,12 @@ async function runTests(): Promise<void> {
   results.value.push(testHealth());
 
   running.value = false;
+  refreshSnapshot();
 }
+
+onMounted(() => {
+  refreshSnapshot();
+});
 
 function testConnector(): TestResult {
   const start = performance.now();
@@ -95,7 +119,46 @@ function testHealth(): TestResult {
     <div class="panel-header">
       <h3 class="panel-title">{{ t('test.core.title') }}</h3>
       <p class="panel-desc">{{ t('test.core.description') }}</p>
-      <button class="run-btn" :disabled="running" @click="runTests">{{ t('test.run') }}</button>
+      <div class="panel-actions">
+        <button class="run-btn" :disabled="running" @click="runTests">{{ t('test.run') }}</button>
+        <button class="ghost-btn" @click="refreshSnapshot">{{ t('test.refresh') }}</button>
+      </div>
+    </div>
+
+    <div class="info-banner">
+      <span class="banner-icon">⚡</span>
+      <span class="banner-text">{{ t('test.core.banner_info') }}</span>
+    </div>
+
+    <div class="status-grid">
+      <div class="status-card" :class="{ 'status-highlight': snapshot.sdkReady }">
+        <div class="status-label">{{ t('test.core.status_ready') }}</div>
+        <div class="status-value">
+          <span class="status-dot" :class="snapshot.sdkReady ? 'pass' : 'fail'"></span>
+          <span>{{ snapshot.sdkReady ? t('test.pass') : t('test.fail') }}</span>
+        </div>
+      </div>
+      <div class="status-card" :class="{ 'status-highlight': snapshot.state === 'ready' }">
+        <div class="status-label">{{ t('test.core.status_state') }}</div>
+        <div class="status-value">
+          <span class="status-dot" :class="snapshot.state === 'ready' ? 'pass' : 'warn'"></span>
+          <span>{{ formatState(snapshot.state) }}</span>
+        </div>
+      </div>
+      <div class="status-card" :class="{ 'status-highlight': snapshot.connected }">
+        <div class="status-label">{{ t('test.core.status_connected') }}</div>
+        <div class="status-value">
+          <span class="status-dot" :class="snapshot.connected ? 'pass' : 'fail'"></span>
+          <span>{{ snapshot.connected ? t('test.pass') : t('test.fail') }}</span>
+        </div>
+      </div>
+      <div class="status-card" :class="{ 'status-highlight': snapshot.hasRequest }">
+        <div class="status-label">{{ t('test.core.status_request') }}</div>
+        <div class="status-value">
+          <span class="status-dot" :class="snapshot.hasRequest ? 'pass' : 'fail'"></span>
+          <span>{{ snapshot.hasRequest ? t('test.pass') : t('test.fail') }}</span>
+        </div>
+      </div>
     </div>
     <div class="panel-results">
       <div v-for="result in results" :key="result.name" class="result-item">
@@ -109,21 +172,4 @@ function testHealth(): TestResult {
   </div>
 </template>
 
-<style scoped>
-.test-panel { display: flex; flex-direction: column; gap: var(--chips-spacing-md); }
-.panel-header { display: flex; flex-direction: column; gap: var(--chips-spacing-xs); }
-.panel-title { font-size: var(--chips-font-size-base); font-weight: var(--chips-font-weight-semibold); color: var(--chips-color-text); }
-.panel-desc { font-size: var(--chips-font-size-sm); color: var(--chips-color-text-secondary); }
-.run-btn { align-self: flex-start; margin-top: var(--chips-spacing-xs); padding: var(--chips-spacing-xs) var(--chips-spacing-md); background-color: var(--chips-color-primary); color: #fff; border: none; border-radius: var(--chips-radius-sm); font-size: var(--chips-font-size-sm); cursor: pointer; }
-.run-btn:hover { opacity: 0.9; }
-.run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.panel-results { display: flex; flex-direction: column; gap: var(--chips-spacing-xs); }
-.result-item { display: flex; align-items: center; gap: var(--chips-spacing-sm); padding: var(--chips-spacing-xs) var(--chips-spacing-sm); background-color: var(--chips-color-surface); border-radius: var(--chips-radius-sm); font-size: var(--chips-font-size-sm); }
-.result-status { padding: 2px var(--chips-spacing-xs); border-radius: var(--chips-radius-sm); font-size: var(--chips-font-size-xs); font-weight: var(--chips-font-weight-medium); }
-.result-status.pass { background-color: var(--chips-color-success); color: #fff; }
-.result-status.fail { background-color: var(--chips-color-error); color: #fff; }
-.result-name { font-weight: var(--chips-font-weight-medium); color: var(--chips-color-text); }
-.result-message { flex: 1; color: var(--chips-color-text-secondary); font-size: var(--chips-font-size-xs); }
-.result-duration { color: var(--chips-color-text-secondary); font-size: var(--chips-font-size-xs); }
-.no-results { color: var(--chips-color-text-secondary); font-size: var(--chips-font-size-sm); font-style: italic; }
-</style>
+<style src="../../styles/panel-common.css"></style>

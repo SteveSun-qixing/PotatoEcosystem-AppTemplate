@@ -11,6 +11,35 @@ import type { TestResult } from '../../types';
 
 const results = ref<TestResult[]>([]);
 const running = ref(false);
+const eventLog = ref<{ time: string; name: string; payload: string }[]>([]);
+const emitCount = ref(0);
+
+function emitEvent(): void {
+  const sdk = getSdkSync();
+  const time = new Date().toLocaleTimeString();
+  if (!sdk) {
+    eventLog.value.unshift({
+      time,
+      name: 'test:ui',
+      payload: t('test.event.sdk_missing'),
+    });
+    return;
+  }
+
+  const payload = { source: 'test-panel', at: Date.now() };
+  sdk.events.emitSync('test:ui-ping', payload);
+  emitCount.value += 1;
+  eventLog.value.unshift({
+    time,
+    name: 'test:ui-ping',
+    payload: JSON.stringify(payload),
+  });
+}
+
+function clearLog(): void {
+  eventLog.value = [];
+  emitCount.value = 0;
+}
 
 async function runTests(): Promise<void> {
   running.value = true;
@@ -111,7 +140,41 @@ async function testUnsubscribe(): Promise<TestResult> {
     <div class="panel-header">
       <h3 class="panel-title">{{ t('test.event.title') }}</h3>
       <p class="panel-desc">{{ t('test.event.description') }}</p>
-      <button class="run-btn" :disabled="running" @click="runTests">{{ t('test.run') }}</button>
+      <div class="panel-actions">
+        <button class="run-btn" :disabled="running" @click="runTests">{{ t('test.run') }}</button>
+        <button class="ghost-btn" @click="emitEvent">{{ t('test.event.emit') }}</button>
+        <button class="ghost-btn" @click="clearLog">{{ t('test.event.clear') }}</button>
+      </div>
+    </div>
+
+    <div class="info-banner">
+      <span class="banner-icon">📡</span>
+      <span class="banner-text">{{ t('test.event.banner_info') }}</span>
+    </div>
+
+    <div class="event-stats">
+      <div class="stat-card">
+        <div class="stat-label">{{ t('test.event.emit_count') }}</div>
+        <div class="stat-value">{{ emitCount }}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">{{ t('test.event.log_size') }}</div>
+        <div class="stat-value">{{ eventLog.length }}</div>
+      </div>
+    </div>
+
+    <div class="event-log">
+      <div class="event-log-header">
+        <span class="event-log-title">{{ t('test.event.log_title') }}</span>
+      </div>
+      <div v-if="eventLog.length === 0" class="event-log-empty">{{ t('test.event.log_empty') }}</div>
+      <div v-else class="event-log-list">
+        <div v-for="item in eventLog" :key="item.time + item.name" class="event-log-item">
+          <span class="event-time">{{ item.time }}</span>
+          <span class="event-name">{{ item.name }}</span>
+          <span class="event-payload">{{ item.payload }}</span>
+        </div>
+      </div>
     </div>
     <div class="panel-results">
       <div v-for="result in results" :key="result.name" class="result-item">
@@ -125,21 +188,4 @@ async function testUnsubscribe(): Promise<TestResult> {
   </div>
 </template>
 
-<style scoped>
-.test-panel { display: flex; flex-direction: column; gap: var(--chips-spacing-md); }
-.panel-header { display: flex; flex-direction: column; gap: var(--chips-spacing-xs); }
-.panel-title { font-size: var(--chips-font-size-base); font-weight: var(--chips-font-weight-semibold); color: var(--chips-color-text); }
-.panel-desc { font-size: var(--chips-font-size-sm); color: var(--chips-color-text-secondary); }
-.run-btn { align-self: flex-start; margin-top: var(--chips-spacing-xs); padding: var(--chips-spacing-xs) var(--chips-spacing-md); background-color: var(--chips-color-primary); color: #fff; border: none; border-radius: var(--chips-radius-sm); font-size: var(--chips-font-size-sm); cursor: pointer; }
-.run-btn:hover { opacity: 0.9; }
-.run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.panel-results { display: flex; flex-direction: column; gap: var(--chips-spacing-xs); }
-.result-item { display: flex; align-items: center; gap: var(--chips-spacing-sm); padding: var(--chips-spacing-xs) var(--chips-spacing-sm); background-color: var(--chips-color-surface); border-radius: var(--chips-radius-sm); font-size: var(--chips-font-size-sm); }
-.result-status { padding: 2px var(--chips-spacing-xs); border-radius: var(--chips-radius-sm); font-size: var(--chips-font-size-xs); font-weight: var(--chips-font-weight-medium); }
-.result-status.pass { background-color: var(--chips-color-success); color: #fff; }
-.result-status.fail { background-color: var(--chips-color-error); color: #fff; }
-.result-name { font-weight: var(--chips-font-weight-medium); color: var(--chips-color-text); }
-.result-message { flex: 1; color: var(--chips-color-text-secondary); font-size: var(--chips-font-size-xs); }
-.result-duration { color: var(--chips-color-text-secondary); font-size: var(--chips-font-size-xs); }
-.no-results { color: var(--chips-color-text-secondary); font-size: var(--chips-font-size-sm); font-style: italic; }
-</style>
+<style src="../../styles/panel-common.css"></style>

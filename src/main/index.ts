@@ -13,6 +13,7 @@ import { createMainWindow } from './window-manager';
 import { registerIpcHandlers } from './ipc-handlers';
 import { setupApplicationMenu } from './menu';
 import { startCoreProcess, stopCoreProcess } from './core-process';
+import { initIpcBridge, cleanupIpcBridge } from './ipc-bridge';
 
 /** 主窗口引用 */
 let mainWindow: BrowserWindow | null = null;
@@ -26,6 +27,12 @@ async function bootstrap(): Promise<void> {
   // 启动内核进程
   startCoreProcess();
 
+  // 等待内核启动（给内核一些时间启动 IPC 服务器）
+  await new Promise(resolve => setTimeout(resolve, 2000));
+
+  // 初始化 IPC 桥接器
+  initIpcBridge();
+
   // 注册 IPC 处理器
   registerIpcHandlers();
 
@@ -38,21 +45,26 @@ async function bootstrap(): Promise<void> {
   console.log('[AppTemplate] 初始化完成');
 }
 
-// 防止多实例
-const gotTheLock = app.requestSingleInstanceLock();
-if (!gotTheLock) {
-  app.quit();
-} else {
+// 调试：打印变量
+console.log('[DEBUG] typeof app:', typeof app);
+console.log('[DEBUG] app:', app);
+
+// 应用就绪
+app.whenReady().then(() => {
+  // 防止多实例
+  const gotTheLock = app.requestSingleInstanceLock();
+  if (!gotTheLock) {
+    app.quit();
+    return;
+  }
+
   app.on('second-instance', () => {
     if (mainWindow) {
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.focus();
     }
   });
-}
 
-// 应用就绪
-app.whenReady().then(() => {
   bootstrap();
 
   // macOS: 点击 Dock 图标时恢复或重新创建窗口
@@ -77,5 +89,6 @@ app.on('window-all-closed', () => {
 
 // 应用退出前清理
 app.on('before-quit', () => {
+  cleanupIpcBridge();
   stopCoreProcess();
 });

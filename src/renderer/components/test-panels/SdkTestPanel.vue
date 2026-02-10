@@ -4,7 +4,7 @@
  * @description 验证 SDK 初始化、状态查询、连接状态
  */
 
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { t } from '../../services/i18n-service';
 import { getSdkSync } from '../../services/sdk-service';
 import { ChipsSDK } from '@chips/sdk';
@@ -12,6 +12,35 @@ import type { TestResult } from '../../types';
 
 const results = ref<TestResult[]>([]);
 const running = ref(false);
+const status = ref({
+  sdkExists: false,
+  sdkState: 'unknown',
+  connectorReady: false,
+  modules: {
+    i18n: false,
+    events: false,
+    config: false,
+    connector: false,
+  },
+});
+
+function refreshStatus(): void {
+  const sdk = getSdkSync();
+  status.value.sdkExists = !!sdk;
+  status.value.sdkState = sdk?.state ?? 'unknown';
+  status.value.connectorReady = !!sdk?.connector;
+  status.value.modules = {
+    i18n: !!sdk?.i18n,
+    events: !!sdk?.events,
+    config: !!sdk?.config,
+    connector: !!sdk?.connector,
+  };
+}
+
+function formatState(state: string): string {
+  const known = ['ready', 'loading', 'connecting', 'connected', 'disconnected', 'error'];
+  return known.includes(state) ? t(`status.${state}`) : state;
+}
 
 /**
  * 运行所有 SDK 测试
@@ -33,7 +62,12 @@ async function runTests(): Promise<void> {
   results.value.push(await testModules());
 
   running.value = false;
+  refreshStatus();
 }
+
+onMounted(() => {
+  refreshStatus();
+});
 
 async function testInit(): Promise<TestResult> {
   const start = performance.now();
@@ -116,9 +150,64 @@ async function testModules(): Promise<TestResult> {
     <div class="panel-header">
       <h3 class="panel-title">{{ t('test.sdk.title') }}</h3>
       <p class="panel-desc">{{ t('test.sdk.description') }}</p>
-      <button class="run-btn" :disabled="running" @click="runTests">
-        {{ t('test.run') }}
-      </button>
+      <div class="panel-actions">
+        <button class="run-btn" :disabled="running" @click="runTests">
+          {{ t('test.run') }}
+        </button>
+        <button class="ghost-btn" @click="refreshStatus">
+          {{ t('test.refresh') }}
+        </button>
+      </div>
+    </div>
+
+    <div class="info-banner">
+      <span class="banner-icon">ℹ️</span>
+      <span class="banner-text">{{ t('test.sdk.banner_info') }}</span>
+    </div>
+
+    <div class="status-grid">
+      <div class="status-card" :class="{ 'status-highlight': status.sdkExists }">
+        <div class="status-label">{{ t('test.sdk.status_sdk') }}</div>
+        <div class="status-value">
+          <span class="status-dot" :class="status.sdkExists ? 'pass' : 'fail'"></span>
+          <span>{{ status.sdkExists ? t('test.pass') : t('test.fail') }}</span>
+        </div>
+      </div>
+      <div class="status-card" :class="{ 'status-highlight': status.sdkState === 'ready' }">
+        <div class="status-label">{{ t('test.sdk.status_state') }}</div>
+        <div class="status-value">
+          <span class="status-dot" :class="status.sdkState === 'ready' ? 'pass' : 'warn'"></span>
+          <span>{{ formatState(status.sdkState) }}</span>
+        </div>
+      </div>
+      <div class="status-card" :class="{ 'status-highlight': status.connectorReady }">
+        <div class="status-label">{{ t('test.sdk.status_connector') }}</div>
+        <div class="status-value">
+          <span class="status-dot" :class="status.connectorReady ? 'pass' : 'fail'"></span>
+          <span>{{ status.connectorReady ? t('test.pass') : t('test.fail') }}</span>
+        </div>
+      </div>
+      <div class="status-card full-width">
+        <div class="status-label">{{ t('test.sdk.status_modules') }}</div>
+        <div class="module-tags">
+          <span class="module-tag" :class="status.modules.i18n ? 'pass' : 'fail'">
+            <span class="tag-icon">{{ status.modules.i18n ? '✓' : '✗' }}</span>
+            i18n
+          </span>
+          <span class="module-tag" :class="status.modules.events ? 'pass' : 'fail'">
+            <span class="tag-icon">{{ status.modules.events ? '✓' : '✗' }}</span>
+            events
+          </span>
+          <span class="module-tag" :class="status.modules.config ? 'pass' : 'fail'">
+            <span class="tag-icon">{{ status.modules.config ? '✓' : '✗' }}</span>
+            config
+          </span>
+          <span class="module-tag" :class="status.modules.connector ? 'pass' : 'fail'">
+            <span class="tag-icon">{{ status.modules.connector ? '✓' : '✗' }}</span>
+            connector
+          </span>
+        </div>
+      </div>
     </div>
     <div class="panel-results">
       <div v-for="result in results" :key="result.name" class="result-item">
@@ -136,21 +225,4 @@ async function testModules(): Promise<TestResult> {
   </div>
 </template>
 
-<style scoped>
-.test-panel { display: flex; flex-direction: column; gap: var(--chips-spacing-md); }
-.panel-header { display: flex; flex-direction: column; gap: var(--chips-spacing-xs); }
-.panel-title { font-size: var(--chips-font-size-base); font-weight: var(--chips-font-weight-semibold); color: var(--chips-color-text); }
-.panel-desc { font-size: var(--chips-font-size-sm); color: var(--chips-color-text-secondary); }
-.run-btn { align-self: flex-start; margin-top: var(--chips-spacing-xs); padding: var(--chips-spacing-xs) var(--chips-spacing-md); background-color: var(--chips-color-primary); color: #fff; border: none; border-radius: var(--chips-radius-sm); font-size: var(--chips-font-size-sm); cursor: pointer; transition: opacity var(--chips-duration-fast); }
-.run-btn:hover { opacity: 0.9; }
-.run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.panel-results { display: flex; flex-direction: column; gap: var(--chips-spacing-xs); }
-.result-item { display: flex; align-items: center; gap: var(--chips-spacing-sm); padding: var(--chips-spacing-xs) var(--chips-spacing-sm); background-color: var(--chips-color-surface); border-radius: var(--chips-radius-sm); font-size: var(--chips-font-size-sm); }
-.result-status { padding: 2px var(--chips-spacing-xs); border-radius: var(--chips-radius-sm); font-size: var(--chips-font-size-xs); font-weight: var(--chips-font-weight-medium); }
-.result-status.pass { background-color: var(--chips-color-success); color: #fff; }
-.result-status.fail { background-color: var(--chips-color-error); color: #fff; }
-.result-name { font-weight: var(--chips-font-weight-medium); color: var(--chips-color-text); }
-.result-message { flex: 1; color: var(--chips-color-text-secondary); font-size: var(--chips-font-size-xs); }
-.result-duration { color: var(--chips-color-text-secondary); font-size: var(--chips-font-size-xs); }
-.no-results { color: var(--chips-color-text-secondary); font-size: var(--chips-font-size-sm); font-style: italic; }
-</style>
+<style src="../../styles/panel-common.css"></style>

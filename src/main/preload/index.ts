@@ -67,10 +67,26 @@ const electronAPI = {
   invoke: (channel: string, ...args: unknown[]): Promise<unknown> => {
     return ipcRenderer.invoke(channel, ...args);
   },
+
+  /** IPC Renderer（供 SDK 使用） */
+  ipcRenderer: {
+    invoke: (channel: string, ...args: unknown[]): Promise<unknown> => {
+      return ipcRenderer.invoke(channel, ...args);
+    },
+  },
 };
 
 // 通过 contextBridge 安全暴露到 window 对象
 contextBridge.exposeInMainWorld('electronAPI', electronAPI);
+
+// 为了兼容性，同时暴露为 electron 命名空间（供 SDK 使用）
+contextBridge.exposeInMainWorld('electron', {
+  ipcRenderer: {
+    invoke: (channel: string, ...args: unknown[]): Promise<unknown> => {
+      return ipcRenderer.invoke(channel, ...args);
+    },
+  },
+});
 
 // TypeScript 类型声明
 export type ElectronAPI = typeof electronAPI;

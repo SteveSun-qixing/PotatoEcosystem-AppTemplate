@@ -34,7 +34,7 @@ export async function getAppSdk(): Promise<ChipsSDK> {
       const connector = createConnector();
       const options: ChipsSDKOptions = {
         connectorInstance: connector,
-        autoConnect: false,
+        autoConnect: true, // 启用自动连接
         debug: true,
       };
 

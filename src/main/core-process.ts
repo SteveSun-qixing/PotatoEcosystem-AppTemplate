@@ -16,13 +16,11 @@ import { app } from 'electron';
 /** 内核子进程 */
 let coreProcess: ChildProcess | null = null;
 
-/** 开发模式 */
-const isDev = !app.isPackaged;
-
 /**
  * 获取内核可执行文件路径
  */
 function getCorePath(): string {
+  const isDev = !app.isPackaged;
   if (isDev) {
     return join(__dirname, '../../../Chips-core/target/debug/chips-core');
   }

@@ -4,7 +4,7 @@
  * @description 验证主题切换、CSS 变量注入、亮暗模式
  */
 
-import { ref } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { t } from '../../services/i18n-service';
 import { getSdkSync } from '../../services/sdk-service';
 import { setTheme, getTheme } from '../../services/theme-service';
@@ -14,6 +14,25 @@ import type { TestResult } from '../../types';
 const appStore = useAppStore();
 const results = ref<TestResult[]>([]);
 const running = ref(false);
+const palette = ref<{ key: string; label: string; value: string }[]>([]);
+
+function refreshPalette(): void {
+  const root = document.documentElement;
+  palette.value = [
+    { key: '--chips-color-primary', label: 'primary', value: getComputedStyle(root).getPropertyValue('--chips-color-primary').trim() },
+    { key: '--chips-color-background', label: 'background', value: getComputedStyle(root).getPropertyValue('--chips-color-background').trim() },
+    { key: '--chips-color-surface', label: 'surface', value: getComputedStyle(root).getPropertyValue('--chips-color-surface').trim() },
+    { key: '--chips-color-border', label: 'border', value: getComputedStyle(root).getPropertyValue('--chips-color-border').trim() },
+    { key: '--chips-color-text', label: 'text', value: getComputedStyle(root).getPropertyValue('--chips-color-text').trim() },
+  ];
+}
+
+function toggleThemePreview(): void {
+  const next = appStore.theme === 'default-dark' ? 'default-light' : 'default-dark';
+  setTheme(next);
+  appStore.setTheme(next);
+  refreshPalette();
+}
 
 async function runTests(): Promise<void> {
   running.value = true;
@@ -25,7 +44,19 @@ async function runTests(): Promise<void> {
   results.value.push(testDetect());
 
   running.value = false;
+  refreshPalette();
 }
+
+onMounted(() => {
+  refreshPalette();
+});
+
+watch(
+  () => appStore.theme,
+  () => {
+    refreshPalette();
+  },
+);
 
 function testSwitch(): TestResult {
   const start = performance.now();
@@ -117,7 +148,25 @@ function testDetect(): TestResult {
     <div class="panel-header">
       <h3 class="panel-title">{{ t('test.theme.title') }}</h3>
       <p class="panel-desc">{{ t('test.theme.description') }}</p>
-      <button class="run-btn" :disabled="running" @click="runTests">{{ t('test.run') }}</button>
+      <div class="panel-actions">
+        <button class="run-btn" :disabled="running" @click="runTests">{{ t('test.run') }}</button>
+        <button class="ghost-btn" @click="toggleThemePreview">{{ t('test.theme.toggle_theme') }}</button>
+      </div>
+    </div>
+
+    <div class="info-banner">
+      <span class="banner-icon">🎨</span>
+      <span class="banner-text">{{ t('test.theme.banner_info') }}</span>
+    </div>
+
+    <div class="palette-grid">
+      <div v-for="item in palette" :key="item.key" class="palette-card">
+        <div class="palette-swatch" :style="{ backgroundColor: item.value || '#f0f0f0' }"></div>
+        <div class="palette-meta">
+          <div class="palette-label">{{ t(`test.theme.palette_${item.label}`) }}</div>
+          <div class="palette-value">{{ item.value || '—' }}</div>
+        </div>
+      </div>
     </div>
     <div class="panel-results">
       <div v-for="result in results" :key="result.name" class="result-item">
@@ -131,21 +180,4 @@ function testDetect(): TestResult {
   </div>
 </template>
 
-<style scoped>
-.test-panel { display: flex; flex-direction: column; gap: var(--chips-spacing-md); }
-.panel-header { display: flex; flex-direction: column; gap: var(--chips-spacing-xs); }
-.panel-title { font-size: var(--chips-font-size-base); font-weight: var(--chips-font-weight-semibold); color: var(--chips-color-text); }
-.panel-desc { font-size: var(--chips-font-size-sm); color: var(--chips-color-text-secondary); }
-.run-btn { align-self: flex-start; margin-top: var(--chips-spacing-xs); padding: var(--chips-spacing-xs) var(--chips-spacing-md); background-color: var(--chips-color-primary); color: #fff; border: none; border-radius: var(--chips-radius-sm); font-size: var(--chips-font-size-sm); cursor: pointer; }
-.run-btn:hover { opacity: 0.9; }
-.run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.panel-results { display: flex; flex-direction: column; gap: var(--chips-spacing-xs); }
-.result-item { display: flex; align-items: center; gap: var(--chips-spacing-sm); padding: var(--chips-spacing-xs) var(--chips-spacing-sm); background-color: var(--chips-color-surface); border-radius: var(--chips-radius-sm); font-size: var(--chips-font-size-sm); }
-.result-status { padding: 2px var(--chips-spacing-xs); border-radius: var(--chips-radius-sm); font-size: var(--chips-font-size-xs); font-weight: var(--chips-font-weight-medium); }
-.result-status.pass { background-color: var(--chips-color-success); color: #fff; }
-.result-status.fail { background-color: var(--chips-color-error); color: #fff; }
-.result-name { font-weight: var(--chips-font-weight-medium); color: var(--chips-color-text); }
-.result-message { flex: 1; color: var(--chips-color-text-secondary); font-size: var(--chips-font-size-xs); }
-.result-duration { color: var(--chips-color-text-secondary); font-size: var(--chips-font-size-xs); }
-.no-results { color: var(--chips-color-text-secondary); font-size: var(--chips-font-size-sm); font-style: italic; }
-</style>
+<style src="../../styles/panel-common.css"></style>

@@ -11,8 +11,10 @@
 import { BrowserWindow, shell, app } from 'electron';
 import { join } from 'path';
 
-/** 开发模式判断 */
-const isDev = !app.isPackaged;
+/** 获取开发模式状态 */
+function isDev(): boolean {
+  return !app.isPackaged;
+}
 
 /** 窗口默认配置 */
 const WINDOW_DEFAULTS = {
@@ -55,7 +57,7 @@ export function createMainWindow(): BrowserWindow {
   });
 
   // 加载页面
-  if (isDev && process.env['ELECTRON_RENDERER_URL']) {
+  if (isDev() && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL']);
     mainWindow.webContents.openDevTools();
   } else {

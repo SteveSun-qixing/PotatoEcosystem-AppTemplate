@@ -37,16 +37,17 @@ const isMac = computed(() => {
     <div class="header-actions">
       <!-- 语言切换 -->
       <button class="header-btn" :title="t('header.lang_zh')" @click="toggleLocale">
-        {{ appStore.locale === 'zh-CN' ? t('header.lang_zh') : t('header.lang_en') }}
+        <span class="btn-icon">🌐</span>
+        <span class="btn-text">{{ appStore.locale === 'zh-CN' ? t('header.lang_zh') : t('header.lang_en') }}</span>
       </button>
 
       <!-- 主题切换 -->
       <button
-        class="header-btn"
+        class="header-btn theme-btn"
         :title="isDark ? t('header.theme_light') : t('header.theme_dark')"
         @click="toggleTheme"
       >
-        {{ isDark ? '☀' : '☾' }}
+        <span class="btn-icon theme-icon">{{ isDark ? '☀️' : '🌙' }}</span>
       </button>
     </div>
   </header>
@@ -56,12 +57,13 @@ const isMac = computed(() => {
 .app-header {
   display: flex;
   align-items: center;
-  height: 48px;
-  padding: 0 var(--chips-spacing-md);
-  background-color: var(--chips-color-surface);
-  border-bottom: 1px solid var(--chips-color-border);
+  height: 52px;
+  padding: 0 var(--chips-spacing-lg, 20px);
+  background-color: var(--chips-color-surface, #f8fafc);
+  border-bottom: 1px solid var(--chips-color-border, #e2e8f0);
   -webkit-app-region: drag;
   user-select: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
 }
 
 .app-header.is-mac {
@@ -77,32 +79,57 @@ const isMac = computed(() => {
 }
 
 .title-text {
-  font-size: var(--chips-font-size-sm);
-  font-weight: var(--chips-font-weight-medium);
-  color: var(--chips-color-text);
+  font-size: var(--chips-font-size-base, 0.95rem);
+  font-weight: var(--chips-font-weight-semibold, 600);
+  color: var(--chips-color-text, #1e293b);
+  letter-spacing: -0.01em;
 }
 
 .header-actions {
   display: flex;
   align-items: center;
-  gap: var(--chips-spacing-xs);
+  gap: var(--chips-spacing-sm, 10px);
   -webkit-app-region: no-drag;
 }
 
 .header-btn {
-  padding: var(--chips-spacing-xs) var(--chips-spacing-sm);
-  background: transparent;
-  border: 1px solid var(--chips-color-border);
-  border-radius: var(--chips-radius-sm);
-  color: var(--chips-color-text-secondary);
-  font-size: var(--chips-font-size-xs);
+  display: flex;
+  align-items: center;
+  gap: var(--chips-spacing-xs, 6px);
+  padding: var(--chips-spacing-xs, 7px) var(--chips-spacing-md, 14px);
+  background: var(--chips-color-background, #ffffff);
+  border: 1.5px solid var(--chips-color-border, #e2e8f0);
+  border-radius: var(--chips-radius-md, 8px);
+  color: var(--chips-color-text-secondary, #64748b);
+  font-size: var(--chips-font-size-xs, 0.8rem);
+  font-weight: var(--chips-font-weight-medium, 500);
   cursor: pointer;
-  transition: all var(--chips-duration-fast) var(--chips-easing-default);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .header-btn:hover {
-  color: var(--chips-color-text);
-  border-color: var(--chips-color-primary);
-  background-color: var(--chips-color-surface);
+  color: var(--chips-color-text, #1e293b);
+  border-color: var(--chips-color-primary, #3b82f6);
+  background-color: rgba(59, 130, 246, 0.04);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.15);
+}
+
+.header-btn:active {
+  transform: translateY(0);
+}
+
+.header-btn.theme-btn {
+  padding: var(--chips-spacing-xs, 7px);
+  width: 36px;
+  justify-content: center;
+}
+
+.btn-icon {
+  font-size: 1rem;
+}
+
+.btn-text {
+  line-height: 1;
 }
 </style>

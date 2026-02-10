@@ -10,11 +10,12 @@
  * - 组件库集成：使用 ChipsProvider + ThemeProvider 包裹
  */
 
-import { ref, onMounted, onUnmounted, computed } from 'vue';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { ChipsProvider, ThemeProvider } from '@chips/components';
 import { useAppStore } from './stores/app-store';
 import { initializeI18n, t } from './services/i18n-service';
-import { initializeTheme } from './services/theme-service';
+import { initializeTheme, setTheme } from './services/theme-service';
+import { getSdkSync } from './services/sdk-service';
 import {
   initializeKeyboard,
   destroyKeyboard,
@@ -30,6 +31,19 @@ import EventTestPanel from './components/test-panels/EventTestPanel.vue';
 import CoreTestPanel from './components/test-panels/CoreTestPanel.vue';
 
 const appStore = useAppStore();
+
+// 监听主题变化并重新应用到 DOM
+watch(
+  () => appStore.theme,
+  (newTheme) => {
+    const sdk = getSdkSync();
+    if (sdk) {
+      sdk.themes.setTheme(newTheme);
+      sdk.themes.applyToDOM(document.documentElement);
+      console.log('[App] 主题已重新应用到 DOM:', newTheme);
+    }
+  }
+);
 
 /** 应用是否就绪 */
 const isReady = computed(() => appStore.isReady);
@@ -177,6 +191,7 @@ body {
   font-size: var(--chips-font-size-base, 1rem);
   color: var(--chips-color-text, #1e293b);
   background-color: var(--chips-color-background, #ffffff);
+  line-height: var(--chips-line-height-base, 1.6);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -202,16 +217,16 @@ body {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--chips-spacing-md);
+  gap: var(--chips-spacing-md, 16px);
 }
 
 .loading-spinner {
-  width: 36px;
-  height: 36px;
-  border: 3px solid var(--chips-color-border);
-  border-top-color: var(--chips-color-primary);
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(59, 130, 246, 0.1);
+  border-top-color: var(--chips-color-primary, #3b82f6);
   border-radius: 50%;
-  animation: spin 0.8s linear infinite;
+  animation: spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
 }
 
 @keyframes spin {
@@ -221,8 +236,9 @@ body {
 }
 
 .loading-text {
-  color: var(--chips-color-text-secondary);
-  font-size: var(--chips-font-size-sm);
+  color: var(--chips-color-text-secondary, #64748b);
+  font-size: var(--chips-font-size-sm, 0.875rem);
+  font-weight: var(--chips-font-weight-medium, 500);
 }
 
 /* 错误状态 */
@@ -268,57 +284,110 @@ body {
 .app-main {
   flex: 1;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   overflow: hidden;
-  padding: var(--chips-spacing-lg);
-  gap: var(--chips-spacing-md);
+  padding: var(--chips-spacing-lg, 24px);
+  gap: var(--chips-spacing-lg, 24px);
+  background-color: var(--chips-color-background, #ffffff);
 }
 
 /* 测试导航 */
 .test-nav {
   display: flex;
   flex-direction: column;
-  gap: var(--chips-spacing-sm);
+  gap: var(--chips-spacing-md, 16px);
+  width: min(260px, 100%);
+  padding: var(--chips-spacing-md, 16px);
+  border: 1px solid var(--chips-color-border, #e2e8f0);
+  border-radius: var(--chips-radius-md, 12px);
+  background-color: var(--chips-color-surface, #f8fafc);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 }
 
 .test-nav-title {
-  font-size: var(--chips-font-size-lg);
-  font-weight: var(--chips-font-weight-semibold);
-  color: var(--chips-color-text);
+  font-size: var(--chips-font-size-base, 0.95rem);
+  font-weight: var(--chips-font-weight-semibold, 600);
+  color: var(--chips-color-text, #1e293b);
+  letter-spacing: -0.01em;
+  margin-bottom: var(--chips-spacing-xs, 4px);
 }
 
 .test-nav-tabs {
   display: flex;
-  gap: var(--chips-spacing-xs);
-  border-bottom: 1px solid var(--chips-color-border);
-  padding-bottom: var(--chips-spacing-sm);
+  flex-direction: column;
+  gap: var(--chips-spacing-xs, 8px);
 }
 
 .test-nav-tab {
-  padding: var(--chips-spacing-xs) var(--chips-spacing-md);
-  background: transparent;
-  border: 1px solid transparent;
-  border-radius: var(--chips-radius-sm);
-  color: var(--chips-color-text-secondary);
-  font-size: var(--chips-font-size-sm);
+  text-align: left;
+  padding: var(--chips-spacing-sm, 10px) var(--chips-spacing-md, 12px);
+  background: var(--chips-color-background, #ffffff);
+  border: 1px solid var(--chips-color-border, #e2e8f0);
+  border-radius: var(--chips-radius-sm, 8px);
+  color: var(--chips-color-text-secondary, #64748b);
+  font-size: var(--chips-font-size-sm, 0.875rem);
   cursor: pointer;
-  transition: all var(--chips-duration-fast) var(--chips-easing-default);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
 }
 
 .test-nav-tab:hover {
-  color: var(--chips-color-text);
-  background-color: var(--chips-color-surface);
+  color: var(--chips-color-text, #1e293b);
+  border-color: var(--chips-color-primary, #3b82f6);
+  transform: translateX(2px);
+  box-shadow: 0 2px 4px rgba(59, 130, 246, 0.1);
 }
 
 .test-nav-tab.active {
-  color: var(--chips-color-primary);
-  border-color: var(--chips-color-primary);
-  background-color: var(--chips-color-surface);
+  color: var(--chips-color-text, #1e293b);
+  font-weight: var(--chips-font-weight-medium, 500);
+  border-color: var(--chips-color-primary, #3b82f6);
+  background: linear-gradient(to right, rgba(59, 130, 246, 0.05), rgba(59, 130, 246, 0.02));
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.1), 0 2px 4px rgba(59, 130, 246, 0.1);
 }
 
 /* 测试内容 */
 .test-content {
   flex: 1;
+  min-width: 0;
+  padding: var(--chips-spacing-lg, 24px);
+  border: 1px solid var(--chips-color-border, #e2e8f0);
+  border-radius: var(--chips-radius-md, 12px);
+  background-color: var(--chips-color-surface, #ffffff);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
   overflow-y: auto;
+}
+
+.test-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.test-content::-webkit-scrollbar-track {
+  background: var(--chips-color-background, #f8fafc);
+  border-radius: 4px;
+}
+
+.test-content::-webkit-scrollbar-thumb {
+  background: var(--chips-color-border, #cbd5e1);
+  border-radius: 4px;
+}
+
+.test-content::-webkit-scrollbar-thumb:hover {
+  background: var(--chips-color-text-secondary, #94a3b8);
+}
+
+@media (max-width: 960px) {
+  .app-main {
+    flex-direction: column;
+  }
+
+  .test-nav {
+    width: 100%;
+  }
+
+  .test-nav-tabs {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
 }
 </style>

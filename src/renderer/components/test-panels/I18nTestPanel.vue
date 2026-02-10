@@ -4,7 +4,7 @@
  * @description 验证多语言切换、变量插值、key 查找
  */
 
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { t, setLocale, getLocale } from '../../services/i18n-service';
 import { getSdkSync } from '../../services/sdk-service';
 import { useAppStore } from '../../stores/app-store';
@@ -13,6 +13,17 @@ import type { TestResult } from '../../types';
 const appStore = useAppStore();
 const results = ref<TestResult[]>([]);
 const running = ref(false);
+const sampleCount = ref(42);
+
+const currentLocale = computed(() => appStore.locale);
+const sampleTitle = computed(() => t('app.title'));
+const sampleStatus = computed(() => t('status.ready'));
+
+function toggleLocalePreview(): void {
+  const next = currentLocale.value === 'zh-CN' ? 'en-US' : 'zh-CN';
+  setLocale(next);
+  appStore.setLocale(next);
+}
 
 async function runTests(): Promise<void> {
   running.value = true;
@@ -110,9 +121,38 @@ function testFallback(): TestResult {
     <div class="panel-header">
       <h3 class="panel-title">{{ t('test.i18n.title') }}</h3>
       <p class="panel-desc">{{ t('test.i18n.description') }}</p>
-      <button class="run-btn" :disabled="running" @click="runTests">
-        {{ t('test.run') }}
-      </button>
+      <div class="panel-actions">
+        <button class="run-btn" :disabled="running" @click="runTests">
+          {{ t('test.run') }}
+        </button>
+        <button class="ghost-btn" @click="toggleLocalePreview">
+          {{ t('test.i18n.toggle_locale') }}
+        </button>
+      </div>
+    </div>
+
+    <div class="info-banner">
+      <span class="banner-icon">🌍</span>
+      <span class="banner-text">{{ t('test.i18n.banner_info') }}</span>
+    </div>
+
+    <div class="preview-grid">
+      <div class="preview-card">
+        <div class="preview-label">{{ t('test.i18n.current_locale') }}</div>
+        <div class="preview-value">{{ currentLocale }}</div>
+      </div>
+      <div class="preview-card">
+        <div class="preview-label">{{ t('test.i18n.sample_title') }}</div>
+        <div class="preview-value">{{ sampleTitle }}</div>
+      </div>
+      <div class="preview-card">
+        <div class="preview-label">{{ t('test.i18n.sample_status') }}</div>
+        <div class="preview-value">{{ sampleStatus }}</div>
+      </div>
+      <div class="preview-card">
+        <div class="preview-label">{{ t('test.i18n.sample_count') }}</div>
+        <div class="preview-value">{{ sampleCount }}</div>
+      </div>
     </div>
     <div class="panel-results">
       <div v-for="result in results" :key="result.name" class="result-item">
@@ -130,21 +170,4 @@ function testFallback(): TestResult {
   </div>
 </template>
 
-<style scoped>
-.test-panel { display: flex; flex-direction: column; gap: var(--chips-spacing-md); }
-.panel-header { display: flex; flex-direction: column; gap: var(--chips-spacing-xs); }
-.panel-title { font-size: var(--chips-font-size-base); font-weight: var(--chips-font-weight-semibold); color: var(--chips-color-text); }
-.panel-desc { font-size: var(--chips-font-size-sm); color: var(--chips-color-text-secondary); }
-.run-btn { align-self: flex-start; margin-top: var(--chips-spacing-xs); padding: var(--chips-spacing-xs) var(--chips-spacing-md); background-color: var(--chips-color-primary); color: #fff; border: none; border-radius: var(--chips-radius-sm); font-size: var(--chips-font-size-sm); cursor: pointer; }
-.run-btn:hover { opacity: 0.9; }
-.run-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.panel-results { display: flex; flex-direction: column; gap: var(--chips-spacing-xs); }
-.result-item { display: flex; align-items: center; gap: var(--chips-spacing-sm); padding: var(--chips-spacing-xs) var(--chips-spacing-sm); background-color: var(--chips-color-surface); border-radius: var(--chips-radius-sm); font-size: var(--chips-font-size-sm); }
-.result-status { padding: 2px var(--chips-spacing-xs); border-radius: var(--chips-radius-sm); font-size: var(--chips-font-size-xs); font-weight: var(--chips-font-weight-medium); }
-.result-status.pass { background-color: var(--chips-color-success); color: #fff; }
-.result-status.fail { background-color: var(--chips-color-error); color: #fff; }
-.result-name { font-weight: var(--chips-font-weight-medium); color: var(--chips-color-text); }
-.result-message { flex: 1; color: var(--chips-color-text-secondary); font-size: var(--chips-font-size-xs); }
-.result-duration { color: var(--chips-color-text-secondary); font-size: var(--chips-font-size-xs); }
-.no-results { color: var(--chips-color-text-secondary); font-size: var(--chips-font-size-sm); font-style: italic; }
-</style>
+<style src="../../styles/panel-common.css"></style>

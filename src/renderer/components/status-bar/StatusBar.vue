@@ -54,30 +54,41 @@ const connectionText = computed(() => {
 .status-bar {
   display: flex;
   align-items: center;
-  height: 28px;
-  padding: 0 var(--chips-spacing-md);
-  background-color: var(--chips-color-surface);
-  border-top: 1px solid var(--chips-color-border);
-  gap: var(--chips-spacing-lg);
-  font-size: var(--chips-font-size-xs);
+  height: 32px;
+  padding: 0 var(--chips-spacing-lg, 20px);
+  background-color: var(--chips-color-surface, #f8fafc);
+  border-top: 1px solid var(--chips-color-border, #e2e8f0);
+  gap: var(--chips-spacing-xl, 28px);
+  font-size: var(--chips-font-size-xs, 0.75rem);
   user-select: none;
+  box-shadow: 0 -1px 3px rgba(0, 0, 0, 0.03);
 }
 
 .status-item {
   display: flex;
   align-items: center;
-  gap: var(--chips-spacing-xs);
+  gap: var(--chips-spacing-xs, 6px);
 }
 
 .status-label {
-  color: var(--chips-color-text-secondary);
+  color: var(--chips-color-text-secondary, #64748b);
+  font-weight: var(--chips-font-weight-medium, 500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .status-value {
-  color: var(--chips-color-text);
+  color: var(--chips-color-text, #1e293b);
+  font-weight: var(--chips-font-weight-medium, 500);
+  padding: 2px var(--chips-spacing-xs, 6px);
+  border-radius: var(--chips-radius-sm, 4px);
+  background-color: var(--chips-color-background, #ffffff);
+  border: 1px solid var(--chips-color-border, #e2e8f0);
 }
 
 .status-value.success {
-  color: var(--chips-color-success);
+  color: #10b981;
+  border-color: #10b981;
+  background-color: rgba(16, 185, 129, 0.06);
 }
 </style>
