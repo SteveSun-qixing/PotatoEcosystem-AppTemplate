@@ -4,14 +4,17 @@
  */
 
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite';
-import vue from '@vitejs/plugin-vue';
+import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
 /**
  * 薯片组件库源码根目录
  * 开发阶段直接引用组件库源码而非构建产物
  */
-const componentsLibSrc = resolve(__dirname, '../Chips-ComponentLibrary/src');
+const componentLibrarySrc = resolve(
+  __dirname,
+  '../Chips-ComponentLibrary/packages/component-library/src',
+);
 
 export default defineConfig({
   /**
@@ -45,11 +48,16 @@ export default defineConfig({
   },
 
   /**
-   * 渲染进程配置（Vue 应用）
+   * 渲染进程配置（React 应用）
    */
   renderer: {
     root: resolve(__dirname, 'src/renderer'),
-    plugins: [vue()],
+    plugins: [react()],
+    server: {
+      fs: {
+        allow: [resolve(__dirname, '..')],
+      },
+    },
     build: {
       rollupOptions: {
         input: resolve(__dirname, 'src/renderer/index.html'),
@@ -60,15 +68,7 @@ export default defineConfig({
         /* 薯片组件库包名 → 源码入口 */
         {
           find: '@chips/components',
-          replacement: resolve(componentsLibSrc, 'index.ts'),
-        },
-        /**
-         * 组件库内部 @/ 别名 → 组件库 src/
-         * 使用正则精确匹配，避免与 npm scope 包名冲突
-         */
-        {
-          find: /^@\//,
-          replacement: componentsLibSrc + '/',
+          replacement: resolve(componentLibrarySrc, 'index.ts'),
         },
         /* 模板应用自身路径别名 */
         {
