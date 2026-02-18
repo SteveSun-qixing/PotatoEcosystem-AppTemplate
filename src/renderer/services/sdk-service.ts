@@ -9,19 +9,42 @@
  */
 
 import { ChipsSDK, type ChipsSDKOptions, CoreConnector } from '@chips/sdk';
+import yaml from 'js-yaml';
+import appConfigRaw from '../config/default.yaml?raw';
 
-/** 内核 WebSocket 地址 */
-const CORE_WS_URL = 'ws://127.0.0.1:9527';
+interface AppConfig {
+  connection?: {
+    core_url?: string;
+    auto_connect?: boolean;
+  };
+}
+
+const parsedConfig = (yaml.load(appConfigRaw) as AppConfig | null) ?? {};
+const coreUrl = parsedConfig.connection?.core_url ?? 'tcp://127.0.0.1:9527';
+const autoConnect = parsedConfig.connection?.auto_connect ?? true;
 
 /** SDK 单例 Promise */
 let sdkPromise: Promise<ChipsSDK> | null = null;
 
 /**
  * 创建 CoreConnector 实例
- * 开发模式使用本地连接器，生产模式使用 WebSocket 连接器
+ * AppTemplate 仅支持 Electron 预加载桥接连接 Core（不直接走 WebSocket）
  */
 function createConnector(): CoreConnector {
-  return new CoreConnector({ url: CORE_WS_URL });
+  const hasElectronBridge =
+    typeof window !== 'undefined' &&
+    !!(
+      (window as unknown as { electron?: { ipcRenderer?: { invoke?: unknown } } }).electron
+        ?.ipcRenderer?.invoke
+    );
+
+  if (!hasElectronBridge) {
+    throw new Error(
+      'Electron IPC bridge is unavailable. Please start AppTemplate via electron-vite dev (not plain browser).'
+    );
+  }
+
+  return new CoreConnector({ url: coreUrl });
 }
 
 /**
@@ -34,7 +57,7 @@ export async function getAppSdk(): Promise<ChipsSDK> {
       const connector = createConnector();
       const options: ChipsSDKOptions = {
         connectorInstance: connector,
-        autoConnect: true, // 启用自动连接
+        autoConnect,
         debug: true,
       };
 

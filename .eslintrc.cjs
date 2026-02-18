@@ -12,22 +12,23 @@ module.exports = {
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
-    'plugin:vue/vue3-recommended',
+    'plugin:react-hooks/recommended',
     'prettier',
   ],
-  parser: 'vue-eslint-parser',
   parserOptions: {
     parser: '@typescript-eslint/parser',
     ecmaVersion: 'latest',
     sourceType: 'module',
+    ecmaFeatures: {
+      jsx: true,
+    },
   },
-  plugins: ['@typescript-eslint'],
+  plugins: ['@typescript-eslint', 'react-hooks'],
   rules: {
     /* 命名约定：camelCase 变量/函数、PascalCase 类/接口 */
     '@typescript-eslint/naming-convention': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-    'vue/multi-word-component-names': 'off',
     'no-console': 'off',
   },
 };

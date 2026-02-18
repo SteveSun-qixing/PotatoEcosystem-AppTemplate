@@ -9,11 +9,15 @@
  */
 
 import type { ChipsSDK } from '@chips/sdk';
+import yaml from 'js-yaml';
+import devI18nRaw from '../i18n/dev_i18n.yaml?raw';
 import { initializeSdk } from './sdk-service';
 import type { Locale } from '../types';
 
 /** 翻译表类型 */
-type TranslationTable = Record<string, unknown>;
+interface TranslationTable {
+  [key: string]: string | TranslationTable;
+}
 
 /** 默认语言 */
 const DEFAULT_LOCALE: Locale = 'zh-CN';
@@ -33,9 +37,7 @@ let sdkInstance: ChipsSDK | null = null;
  */
 async function loadLocalTranslations(): Promise<void> {
   try {
-    const yamlModule = await import('js-yaml');
-    const yamlContent = await import('../i18n/dev_i18n.yaml?raw');
-    const parsed = yamlModule.load(yamlContent.default) as Record<string, TranslationTable>;
+    const parsed = yaml.load(devI18nRaw) as Record<string, TranslationTable>;
 
     if (parsed) {
       localTranslations = parsed;
@@ -51,11 +53,11 @@ async function loadLocalTranslations(): Promise<void> {
  */
 function resolveValue(table: TranslationTable, key: string): string | null {
   const segments = key.split('.');
-  let current: unknown = table;
+  let current: string | TranslationTable | undefined = table;
 
   for (const segment of segments) {
     if (!current || typeof current !== 'object') return null;
-    current = (current as Record<string, unknown>)[segment];
+    current = current[segment];
   }
 
   return typeof current === 'string' ? current : null;

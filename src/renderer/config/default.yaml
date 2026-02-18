@@ -24,7 +24,7 @@ window:
   min_height: 600
 
 connection:
-  core_url: "ws://127.0.0.1:9527"
+  core_url: "tcp://127.0.0.1:9527"
   auto_connect: true
   reconnect_interval: 5000
   max_reconnect_attempts: 3

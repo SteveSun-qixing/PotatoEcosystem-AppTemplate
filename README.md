@@ -35,8 +35,8 @@ Chips-AppTemplate 是薯片生态的**标准示范应用**，严格遵循所有�
 ## 技术栈
 
 - **构建工具**: electron-vite
-- **前端框架**: Vue 3 + TypeScript + Composition API
-- **状态管理**: Pinia
+- **前端框架**: React 19 + TypeScript
+- **组件体系**: @chips/components（自研组件）
 - **打包工具**: electron-builder
 - **测试框架**: Vitest
 - **代码规范**: ESLint + Prettier
@@ -101,10 +101,9 @@ Chips-AppTemplate/
 │   │   ├── menu.ts              # 应用菜单
 │   │   └── preload/index.ts     # 预加载脚本
 │   │
-│   └── renderer/                # 渲染进程（Vue）
+│   └── renderer/                # 渲染进程（React）
 │       ├── services/            # 服务层
-│       ├── stores/              # Pinia 状态管理
-│       ├── composables/         # 组合式函数
+│       ├── state/               # React Context 状态管理
 │       ├── components/          # UI 组件
 │       ├── i18n/                # 翻译文件
 │       ├── config/              # 配置文件

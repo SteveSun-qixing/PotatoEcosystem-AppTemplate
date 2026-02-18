@@ -5,12 +5,6 @@
 
 /// <reference types="vite/client" />
 
-declare module '*.vue' {
-  import type { DefineComponent } from 'vue';
-  const component: DefineComponent<Record<string, unknown>, Record<string, unknown>, unknown>;
-  export default component;
-}
-
 declare module '*.yaml' {
   const content: Record<string, unknown>;
   export default content;
@@ -34,9 +28,7 @@ interface Window {
       maximize: () => Promise<void>;
       close: () => Promise<void>;
     };
-    onMenuAction: (
-      callback: (action: string, ...args: unknown[]) => void,
-    ) => () => void;
+    onMenuAction: (callback: (action: string, ...args: unknown[]) => void) => () => void;
     invoke: (channel: string, ...args: unknown[]) => Promise<unknown>;
   };
 }

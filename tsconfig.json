@@ -4,7 +4,7 @@
     "module": "ESNext",
     "moduleResolution": "bundler",
     "strict": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
@@ -14,14 +14,18 @@
     "baseUrl": ".",
     "paths": {
       "@renderer/*": ["./src/renderer/*"],
-      "@main/*": ["./src/main/*"]
+      "@main/*": ["./src/main/*"],
+      "@chips/components": [
+        "../Chips-ComponentLibrary/packages/component-library/src/index.ts"
+      ]
     },
-    "types": ["node"]
+    "types": ["node", "vite/client"]
   },
   "include": [
     "src/**/*.ts",
+    "src/**/*.tsx",
     "src/**/*.d.ts",
-    "src/**/*.vue"
+    "tests/**/*.ts"
   ],
   "exclude": ["node_modules", "dist", "dist-electron"]
 }
